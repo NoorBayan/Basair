@@ -1,7 +1,7 @@
 import pandas as pd
 from topic_template import *
 from IPython.display import display, HTML
-w = pd.read_csv("Corpus/QuranTopics.csv", sep='\t', encoding='utf-16')
+w = pd.read_csv("corpus/QuranTopics.csv", sep='\t', encoding='utf-16')
 arw={w.en_words.iloc[i]:w.ar_words.iloc[i] for i in range(len(w))}
 cost={w.en_words.iloc[i]:w.cost.iloc[i] for i in range(len(w))}
 wlevel={w.en_words.iloc[i]:w.wlevel.iloc[i] for i in range(len(w))}
