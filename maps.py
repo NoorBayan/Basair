@@ -194,7 +194,7 @@ class TopicsStoryRenderer(object):
 
         return TPL_STORY.format(id=render_id, title=title, story=s, moral=m, question=q, answer=a)
 def get_story_info(title):
-    story = pd.read_csv("Corpus/story.csv", sep='\t', encoding='utf-16')
+    story = pd.read_csv("corpus/story.csv", sep='\t', encoding='utf-16')
     s=story[story.title==title]
     title=list(s.title)[0]
     story=[i.split('\n') for i in list(s.story) if i.split('\n')!=''][0]
