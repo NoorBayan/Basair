@@ -1,4 +1,4 @@
-# Basair: The Semantic Brain (Project Basair)
+# Basair
 
 > **The Integrative Core:** From a silent digital library to an intelligent spiritual companion.
 
