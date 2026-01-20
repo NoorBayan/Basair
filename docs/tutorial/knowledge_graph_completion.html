@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knowledge Graph Completion Tutorial &mdash; Graph4NLP v0.4.1 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Math Word Problem Tutorial" href="math_word_problem.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Graph4NLP
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption"><span class="caption-text">Get Started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../welcome/installation.html">Install Graph4NLP</a></li>
+</ul>
+<p class="caption"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide/graphdata.html">Chapter 1. Graph Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/dataset.html">Chapter 2. Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/construction.html">Chapter 3. Graph Construction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/gnn.html">Chapter 4. Graph Encoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/decoding.html">Chapter 5. Decoder</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/classification.html">Chapter 6. Classification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide/evaluation.html">Chapter 7. Evaluations and Loss components</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Module API references</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/data.html">graph4nlp.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/datasets.html">graph4nlp.datasets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/graph_construction.html">graph4nlp.graph_construction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/graph_embedding.html">graph4nlp.graph_embedding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/prediction.html">graph4nlp.prediction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/loss.html">graph4nlp.loss</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules/evaluation.html">graph4nlp.evaluation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="text_classification.html">Text Classification Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="semantic_parsing.html">Semantic Parsing Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="math_word_problem.html">Math Word Problem Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Knowledge Graph Completion Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#environment-setup">Environment setup</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#create-virtual-environment">Create virtual environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#install-graph4nlp-library-via-pip">Install graph4nlp library via pip</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installation-for-kgc">Installation for KGC</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#import-packages">Import packages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#build-model">Build Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#define-evaluation-for-kg-completion">Define Evaluation for KG Completion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#define-main">Define Main()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-model">Run the model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#results-on-kinship">Results on kinship</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Graph4NLP</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Knowledge Graph Completion Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/tutorial/knowledge_graph_completion.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="knowledge-graph-completion-tutorial">
+<h1>Knowledge Graph Completion Tutorial<a class="headerlink" href="#knowledge-graph-completion-tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>In this tutorial demo, we will use the Graph4NLP library to build a
+GNN-based knowledge graph completion model. The model consists of</p>
+<ul class="simple">
+<li><p>graph embedding module (e.g., GGNN)</p></li>
+<li><p>predictoin module (e.g., DistMult decoder)</p></li>
+</ul>
+<p>We will use the built-in Graph2Seq model APIs to build the model, and
+evaluate it on the Kinship dataset. The full example can be downloaded from
+<a class="reference external" href="https://github.com/graph4ai/graph4nlp_demo/tree/main/KDD2021_demo/kg_completion">knowledge graph completion notebook</a></p>
+</div>
+<div class="section" id="environment-setup">
+<h2>Environment setup<a class="headerlink" href="#environment-setup" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="create-virtual-environment">
+<h3>Create virtual environment<a class="headerlink" href="#create-virtual-environment" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>conda create –name g4l python=3.7</p></li>
+<li><p>conda activate g4l</p></li>
+</ul>
+</div>
+<div class="section" id="install-graph4nlp-library-via-pip">
+<h3>Install graph4nlp library via pip<a class="headerlink" href="#install-graph4nlp-library-via-pip" title="Permalink to this headline">¶</a></h3>
+<p>Ensure that at least PyTorch (&gt;=1.6.0) is installed:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python -c <span class="s2">&quot;import torch; print(torch.__version__)&quot;</span>
+&gt;&gt;&gt; <span class="m">1</span>.6.0
+</pre></div>
+</div>
+<p>Find the CUDA version PyTorch was installed with (for GPU users):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ python -c <span class="s2">&quot;import torch; print(torch.version.cuda)&quot;</span>
+&gt;&gt;&gt; <span class="m">10</span>.2
+</pre></div>
+</div>
+<p>Install the relevant dependencies:</p>
+<p><code class="docutils literal notranslate"><span class="pre">torchtext</span></code> is needed since Graph4NLP relies on it to implement
+embeddings. Please pay attention to the PyTorch requirements before
+installing <code class="docutils literal notranslate"><span class="pre">torchtext</span></code> with the following script! For detailed version
+matching please refer <a class="reference external" href="https://pypi.org/project/torchtext/">here</a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install torchtext <span class="c1"># &gt;=0.7.0</span>
+</pre></div>
+</div>
+<p>Install Graph4NLP</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install graph4nlp<span class="si">${</span><span class="nv">CUDA</span><span class="si">}</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">${CUDA}</span></code> should be replaced by the specific CUDA version
+(<code class="docutils literal notranslate"><span class="pre">none</span></code> (CPU version), <code class="docutils literal notranslate"><span class="pre">&quot;-cu92&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;-cu101&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;-cu102&quot;</span></code>,
+<code class="docutils literal notranslate"><span class="pre">&quot;-cu110&quot;</span></code>). The following table shows the concrete command lines. For
+CUDA 11.1 users, please refer to <code class="docutils literal notranslate"><span class="pre">Installation</span> <span class="pre">via</span> <span class="pre">source</span> <span class="pre">code</span></code>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 78%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Platform</p></th>
+<th class="head"><p>Command</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CPU</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">graph4nlp</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>CUDA 9.2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">graph4nlp-cu92</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>CUDA 10.1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">graph4nlp-cu101</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>CUDA 10.2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">graph4nlp-cu102</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>CUDA 11.0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">graph4nlp-cu110</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="installation-for-kgc">
+<h3>Installation for KGC<a class="headerlink" href="#installation-for-kgc" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Run the preprocessing script for WN18RR and Kinship:
+<code class="docutils literal notranslate"><span class="pre">sh</span> <span class="pre">kg_completion/preprocess.sh</span></code></p></li>
+<li><p>You can now run the model</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="import-packages">
+<h2>Import packages<a class="headerlink" href="#import-packages" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">torch.backends.cudnn</span> <span class="k">as</span> <span class="nn">cudnn</span>
+<span class="kn">import</span> <span class="nn">torch.nn</span> <span class="k">as</span> <span class="nn">nn</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+
+<span class="kn">from</span> <span class="nn">graph4nlp.pytorch.datasets.kinship</span> <span class="kn">import</span> <span class="n">KinshipDataset</span>
+<span class="kn">from</span> <span class="nn">graph4nlp.pytorch.modules.utils.config_utils</span> <span class="kn">import</span> <span class="n">get_yaml_config</span>
+
+<span class="kn">from</span> <span class="nn">model</span> <span class="kn">import</span> <span class="n">Complex</span><span class="p">,</span> <span class="n">ConvE</span><span class="p">,</span> <span class="n">Distmult</span><span class="p">,</span> <span class="n">GCNComplex</span><span class="p">,</span> <span class="n">GCNDistMult</span><span class="p">,</span> <span class="n">GGNNDistMult</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">True</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="build-model">
+<h2>Build Model<a class="headerlink" href="#build-model" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">KGC</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">,</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">KGC</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span> <span class="o">=</span> <span class="n">cfg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_entities</span> <span class="o">=</span> <span class="n">num_entities</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_relations</span> <span class="o">=</span> <span class="n">num_relations</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">ConvE</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">cfg</span><span class="p">),</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;conve&quot;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">ConvE</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">cfg</span><span class="p">),</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;distmult&quot;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Distmult</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">cfg</span><span class="p">),</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;complex&quot;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">Complex</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">cfg</span><span class="p">),</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ggnn_distmult&quot;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">GGNNDistMult</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">cfg</span><span class="p">),</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;gcn_distmult&quot;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">GCNDistMult</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">cfg</span><span class="p">),</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;gcn_complex&quot;</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">GCNComplex</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Namespace</span><span class="p">(</span><span class="o">**</span><span class="n">cfg</span><span class="p">),</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown model type!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e1_tensor</span><span class="p">,</span> <span class="n">rel_tensor</span><span class="p">,</span> <span class="n">KG_graph</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">e1_tensor</span><span class="p">,</span> <span class="n">rel_tensor</span><span class="p">,</span> <span class="n">KG_graph</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">e2_multi</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">e2_multi</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">inference_forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collate_data</span><span class="p">,</span> <span class="n">KG_graph</span><span class="p">):</span>
+        <span class="n">e1_tensor</span> <span class="o">=</span> <span class="n">collate_data</span><span class="p">[</span><span class="s2">&quot;e1_tensor&quot;</span><span class="p">]</span>
+        <span class="n">rel_tensor</span> <span class="o">=</span> <span class="n">collate_data</span><span class="p">[</span><span class="s2">&quot;rel_tensor&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;cuda&quot;</span><span class="p">]:</span>
+            <span class="n">e1_tensor</span> <span class="o">=</span> <span class="n">e1_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="n">rel_tensor</span> <span class="o">=</span> <span class="n">rel_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">e1_tensor</span><span class="p">,</span> <span class="n">rel_tensor</span><span class="p">,</span> <span class="n">KG_graph</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logits</span><span class="p">,</span> <span class="n">e2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">max_values</span><span class="p">,</span> <span class="n">argsort1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">rank1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">argsort1</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">e2</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ground truth e2 rank = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rank1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># argsort1 = argsort1.cpu().numpy()</span>
+        <span class="k">return</span> <span class="n">argsort1</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="define-evaluation-for-kg-completion">
+<h2>Define Evaluation for KG Completion<a class="headerlink" href="#define-evaluation-for-kg-completion" title="Permalink to this headline">¶</a></h2>
+<p>This part we follow the implementaion of <a class="reference external" href="https://github.com/TimDettmers/ConvE">ConvE</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">ranking_and_hits_this</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">dev_rank_batcher</span><span class="p">,</span> <span class="n">vocab</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">kg_graph</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="n">hits_left</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">hits_right</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">hits</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ranks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ranks_left</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ranks_right</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="n">hits_left</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">hits_right</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+        <span class="n">hits</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">str2var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dev_rank_batcher</span><span class="p">):</span>
+        <span class="n">e1</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e1_tensor&quot;</span><span class="p">]</span>
+        <span class="n">e2</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e2_tensor&quot;</span><span class="p">]</span>
+        <span class="n">rel</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;rel_tensor&quot;</span><span class="p">]</span>
+        <span class="n">rel_reverse</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;rel_eval_tensor&quot;</span><span class="p">]</span>
+        <span class="n">e2_multi1</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e2_multi1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="n">e2_multi2</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e2_multi2&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;cuda&quot;</span><span class="p">]:</span>
+            <span class="n">e1</span> <span class="o">=</span> <span class="n">e1</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="n">e2</span> <span class="o">=</span> <span class="n">e2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="n">rel</span> <span class="o">=</span> <span class="n">rel</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="n">rel_reverse</span> <span class="o">=</span> <span class="n">rel_reverse</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="n">e2_multi1</span> <span class="o">=</span> <span class="n">e2_multi1</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="n">e2_multi2</span> <span class="o">=</span> <span class="n">e2_multi2</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+        <span class="n">pred1</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">rel</span><span class="p">,</span> <span class="n">kg_graph</span><span class="p">)</span>
+        <span class="n">pred2</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">e2</span><span class="p">,</span> <span class="n">rel_reverse</span><span class="p">,</span> <span class="n">kg_graph</span><span class="p">)</span>
+        <span class="n">pred1</span><span class="p">,</span> <span class="n">pred2</span> <span class="o">=</span> <span class="n">pred1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">pred2</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">e1</span><span class="p">,</span> <span class="n">e2</span> <span class="o">=</span> <span class="n">e1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">e2</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">e2_multi1</span><span class="p">,</span> <span class="n">e2_multi2</span> <span class="o">=</span> <span class="n">e2_multi1</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">e2_multi2</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">e1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="c1"># these filters contain ALL labels</span>
+            <span class="n">filter1</span> <span class="o">=</span> <span class="n">e2_multi1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+            <span class="n">filter2</span> <span class="o">=</span> <span class="n">e2_multi2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+
+            <span class="c1"># save the prediction that is relevant</span>
+            <span class="n">target_value1</span> <span class="o">=</span> <span class="n">pred1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">e2</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="n">target_value2</span> <span class="o">=</span> <span class="n">pred2</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">e1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">()]</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+            <span class="c1"># zero all known cases (this are not interesting)</span>
+            <span class="c1"># this corresponds to the filtered setting</span>
+            <span class="n">pred1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">filter1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="n">pred2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">filter2</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+            <span class="c1"># write base the saved values</span>
+            <span class="n">pred1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">e2</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">target_value1</span>
+            <span class="n">pred2</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">e1</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">target_value2</span>
+
+        <span class="c1"># sort and rank</span>
+        <span class="n">max_values</span><span class="p">,</span> <span class="n">argsort1</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">pred1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">max_values</span><span class="p">,</span> <span class="n">argsort2</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">pred2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">argsort1</span> <span class="o">=</span> <span class="n">argsort1</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="n">argsort2</span> <span class="o">=</span> <span class="n">argsort2</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">e1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="c1"># find the rank of the target entities</span>
+            <span class="n">rank1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">argsort1</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e2</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">rank2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">argsort2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">e1</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">item</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># rank+1, since the lowest rank is rank 1 not rank 0</span>
+            <span class="n">ranks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rank1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">ranks_left</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rank1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">ranks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rank2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">ranks_right</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rank2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># this could be done more elegantly, but here you go</span>
+            <span class="k">for</span> <span class="n">hits_level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">rank1</span> <span class="o">&lt;=</span> <span class="n">hits_level</span><span class="p">:</span>
+                    <span class="n">hits</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                    <span class="n">hits_left</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hits</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                    <span class="n">hits_left</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">rank2</span> <span class="o">&lt;=</span> <span class="n">hits_level</span><span class="p">:</span>
+                    <span class="n">hits</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                    <span class="n">hits_right</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">hits</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+                    <span class="n">hits_right</span><span class="p">[</span><span class="n">hits_level</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+
+        <span class="c1"># dev_rank_batcher.state.loss = [0]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hits left @</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">hits_left</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hits right @</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">hits_right</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hits @</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">hits</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean rank left: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ranks_left</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean rank right: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ranks_right</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean rank: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ranks</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean reciprocal rank left: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ranks_left</span><span class="p">))))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean reciprocal rank right: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ranks_right</span><span class="p">))))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Mean reciprocal rank: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ranks</span><span class="p">))))</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ranks</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="define-main">
+<h2>Define Main()<a class="headerlink" href="#define-main" title="Permalink to this headline">¶</a></h2>
+<p>Next, let’s build a main() function which will do a bunch of things including setting up dataset, dataloader, whole KG,
+model, optimizer, evaluation metrics, train/val/test loops, and so on.</p>
+<p>In particular, users need to set the <code class="docutils literal notranslate"><span class="pre">preprocess</span></code> field in config file to be <code class="docutils literal notranslate"><span class="pre">True</span></code> if they run the code
+for the first time to build the whole KG.</p>
+<p>Users can set <code class="docutils literal notranslate"><span class="pre">resume</span></code> field in config file to be <code class="docutils literal notranslate"><span class="pre">True</span></code> to load a pre-trained model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">model_path</span><span class="p">):</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">KinshipDataset</span><span class="p">(</span>
+        <span class="n">root_dir</span><span class="o">=</span><span class="s2">&quot;examples/pytorch/kg_completion/data/</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;dataset&quot;</span><span class="p">]),</span>
+        <span class="n">topology_subdir</span><span class="o">=</span><span class="s2">&quot;kgc&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">train</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;batch_size&quot;</span><span class="p">],</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;loader_threads&#39;</span><span class="p">],</span>
+        <span class="n">collate_fn</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">collate_fn</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">val_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">val</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;batch_size&quot;</span><span class="p">],</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;loader_threads&#39;</span><span class="p">],</span>
+        <span class="n">collate_fn</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">collate_fn</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">test</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;batch_size&quot;</span><span class="p">],</span>
+        <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">num_workers</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s1">&#39;loader_threads&#39;</span><span class="p">],</span>
+        <span class="n">collate_fn</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">collate_fn</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">num_entities</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">vocab_model</span><span class="o">.</span><span class="n">in_word_vocab</span><span class="p">)</span>
+    <span class="n">num_relations</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">vocab_model</span><span class="o">.</span><span class="n">out_word_vocab</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;preprocess&quot;</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">str2var</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;batch number:&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e2_multi1&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e2_multi1&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;rel&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e1&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e2_multi1&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+        <span class="kn">from</span> <span class="nn">graph4nlp.pytorch.data.data</span> <span class="kn">import</span> <span class="n">GraphData</span>
+
+        <span class="n">KG_graph</span> <span class="o">=</span> <span class="n">GraphData</span><span class="p">()</span>
+        <span class="n">KG_graph</span><span class="o">.</span><span class="n">add_nodes</span><span class="p">(</span><span class="n">num_entities</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">e1</span><span class="p">,</span> <span class="n">rel</span><span class="p">,</span> <span class="n">e2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+            <span class="n">KG_graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span>
+            <span class="n">eid</span> <span class="o">=</span> <span class="n">KG_graph</span><span class="o">.</span><span class="n">edge_ids</span><span class="p">(</span><span class="n">e1</span><span class="p">,</span> <span class="n">e2</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">KG_graph</span><span class="o">.</span><span class="n">edge_attributes</span><span class="p">[</span><span class="n">eid</span><span class="p">][</span><span class="s2">&quot;token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rel</span>
+
+        <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span>
+            <span class="n">KG_graph</span><span class="p">,</span>
+            <span class="s2">&quot;examples/pytorch/kg_completion/data/</span><span class="si">{}</span><span class="s2">/processed/kgc/KG_graph.pt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;dataset&quot;</span><span class="p">]</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">graph_path</span> <span class="o">=</span> <span class="s2">&quot;examples/pytorch/kg_completion/data/</span><span class="si">{}</span><span class="s2">/processed/kgc/&quot;</span> <span class="s2">&quot;KG_graph.pt&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;dataset&quot;</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">KG_graph</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">graph_path</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;cuda&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">KG_graph</span> <span class="o">=</span> <span class="n">KG_graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">KG_graph</span> <span class="o">=</span> <span class="n">KG_graph</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">KGC</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">num_entities</span><span class="p">,</span> <span class="n">num_relations</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;cuda&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;resume&quot;</span><span class="p">]:</span>
+        <span class="n">model_params</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">total_param_size</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">value</span><span class="o">.</span><span class="n">numel</span><span class="p">())</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">model_params</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+            <span class="n">total_param_size</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">total_param_size</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">model_params</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="n">ranking_and_hits_this</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">test_dataloader</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">vocab_model</span><span class="p">,</span> <span class="s2">&quot;test_evaluation&quot;</span><span class="p">,</span> <span class="n">kg_graph</span><span class="o">=</span><span class="n">KG_graph</span>
+        <span class="p">)</span>
+        <span class="n">ranking_and_hits_this</span><span class="p">(</span>
+            <span class="n">cfg</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">val_dataloader</span><span class="p">,</span> <span class="n">dataset</span><span class="o">.</span><span class="n">vocab_model</span><span class="p">,</span> <span class="s2">&quot;dev_evaluation&quot;</span><span class="p">,</span> <span class="n">kg_graph</span><span class="o">=</span><span class="n">KG_graph</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
+
+    <span class="n">best_mrr</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">opt</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;lr&quot;</span><span class="p">],</span> <span class="n">weight_decay</span><span class="o">=</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;l2&quot;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;epochs&quot;</span><span class="p">]):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">str2var</span> <span class="ow">in</span> <span class="n">train_dataloader</span><span class="p">:</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+            <span class="n">e1_tensor</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e1_tensor&quot;</span><span class="p">]</span>
+            <span class="n">rel_tensor</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;rel_tensor&quot;</span><span class="p">]</span>
+            <span class="n">e2_multi</span> <span class="o">=</span> <span class="n">str2var</span><span class="p">[</span><span class="s2">&quot;e2_multi1_binary&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;cuda&quot;</span><span class="p">]:</span>
+                <span class="n">e1_tensor</span> <span class="o">=</span> <span class="n">e1_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+                <span class="n">rel_tensor</span> <span class="o">=</span> <span class="n">rel_tensor</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+                <span class="n">e2_multi</span> <span class="o">=</span> <span class="n">e2_multi</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+            <span class="c1"># label smoothing</span>
+            <span class="n">e2_multi</span> <span class="o">=</span> <span class="p">((</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;label_smoothing&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="n">e2_multi</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">e2_multi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+            <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">e1_tensor</span><span class="p">,</span> <span class="n">rel_tensor</span><span class="p">,</span> <span class="n">KG_graph</span><span class="p">)</span>
+            <span class="n">loss</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">loss</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">e2_multi</span><span class="p">)</span>
+            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+            <span class="n">opt</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+
+            <span class="c1"># train_batcher.state.loss = loss.cpu()</span>
+
+        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">epoch</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">dev_mrr</span> <span class="o">=</span> <span class="n">ranking_and_hits_this</span><span class="p">(</span>
+                    <span class="n">cfg</span><span class="p">,</span>
+                    <span class="n">model</span><span class="p">,</span>
+                    <span class="n">val_dataloader</span><span class="p">,</span>
+                    <span class="n">dataset</span><span class="o">.</span><span class="n">vocab_model</span><span class="p">,</span>
+                    <span class="s2">&quot;dev_evaluation&quot;</span><span class="p">,</span>
+                    <span class="n">kg_graph</span><span class="o">=</span><span class="n">KG_graph</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">dev_mrr</span> <span class="o">&gt;</span> <span class="n">best_mrr</span><span class="p">:</span>
+                    <span class="n">best_mrr</span> <span class="o">=</span> <span class="n">dev_mrr</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;saving best model to </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model_path</span><span class="p">))</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="n">model_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">epoch</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ranking_and_hits_this</span><span class="p">(</span>
+                        <span class="n">cfg</span><span class="p">,</span>
+                        <span class="n">model</span><span class="p">,</span>
+                        <span class="n">test_dataloader</span><span class="p">,</span>
+                        <span class="n">dataset</span><span class="o">.</span><span class="n">vocab_model</span><span class="p">,</span>
+                        <span class="s2">&quot;test_evaluation&quot;</span><span class="p">,</span>
+                        <span class="n">kg_graph</span><span class="o">=</span><span class="n">KG_graph</span><span class="p">,</span>
+                    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="run-the-model">
+<h2>Run the model<a class="headerlink" href="#run-the-model" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">()</span>
+<span class="n">task_args</span> <span class="o">=</span> <span class="n">get_yaml_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s2">&quot;task_config&quot;</span><span class="p">])</span>
+
+<span class="n">task_args</span><span class="p">[</span><span class="s2">&quot;cuda&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="n">model_name</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{2}</span><span class="s2">_</span><span class="si">{3}</span><span class="s2">_</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">task_args</span><span class="p">[</span><span class="s2">&quot;input_drop&quot;</span><span class="p">],</span> <span class="n">task_args</span><span class="p">[</span><span class="s2">&quot;hidden_drop&quot;</span><span class="p">],</span> <span class="n">task_args</span><span class="p">[</span><span class="s2">&quot;model&quot;</span><span class="p">],</span> <span class="n">task_args</span><span class="p">[</span><span class="s2">&quot;direction_option&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+<span class="n">model_path</span> <span class="o">=</span> <span class="s2">&quot;examples/pytorch/kg_completion/saved_models/</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">.model&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+    <span class="n">task_args</span><span class="p">[</span><span class="s2">&quot;dataset&quot;</span><span class="p">],</span> <span class="n">model_name</span>
+<span class="p">)</span>
+
+<span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">task_args</span><span class="p">[</span><span class="s2">&quot;seed&quot;</span><span class="p">])</span>
+<span class="n">main</span><span class="p">(</span><span class="n">task_args</span><span class="p">,</span> <span class="n">model_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="results-on-kinship">
+<h2>Results on kinship<a class="headerlink" href="#results-on-kinship" title="Permalink to this headline">¶</a></h2>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">BCELoss+GGNNDistmult</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Metrics</p></th>
+<th class="head"><p>uni</p></th>
+<th class="head"><p>bi_fuse</p></th>
+<th class="head"><p>bi_sep</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Hits &#64;1</p></td>
+<td><p>40.4</p></td>
+<td><p>39.4</p></td>
+<td><p>38.2</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hits &#64;10</p></td>
+<td><p>88.3</p></td>
+<td><p>88.8</p></td>
+<td><p>88.9</p></td>
+</tr>
+<tr class="row-even"><td><p>MRR</p></td>
+<td><p>54.9</p></td>
+<td><p>54.8</p></td>
+<td><p>53.4</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="math_word_problem.html" class="btn btn-neutral float-left" title="Math Word Problem Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Graph4AI Group.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

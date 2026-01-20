@@ -1,0 +1,38 @@
+# Data
+dataset: 'squad-split2'
+pretrained_word_emb_name: "840B"
+pretrained_word_emb_cache_dir: ".vector_cache"
+out_dir: 'out/squad_split2/qg_ckpt_dep_ggnn'
+
+# Preprocessing
+top_word_vocab: 70000
+share_vocab: True
+word_emb_size: 300
+min_word_freq: 1
+num_hidden: 300 # number of hidden units
+n_samples: null
+
+
+word_dropout: 0.4 # word embedding dropout
+enc_rnn_dropout: 0.3 # Encoder RNN dropout
+coverage_loss_ratio: 0 # coverage loss ratio
+
+
+# Training
+seed: 1234
+batch_size: 50 # batch size
+epochs: 100 # number of maximal training epochs
+grad_clipping: 10
+early_stop_metric: 'BLEU_4'
+patience: 30
+lr: 0.0007 # learning rate
+lr_patience: 10
+lr_reduce_factor: 0.7
+num_workers: 10 # number of data loader workers
+
+
+# Beam search
+beam_size: 5
+
+gpu: -1
+no_cuda: false
